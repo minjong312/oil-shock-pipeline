@@ -7,7 +7,7 @@ print("========================================")
 
 spark = SparkSession.builder.appName("GDELT_ExchangeRate_Direct").getOrCreate()
 
-raw_gdelt = spark.read.csv("data/*.export.CSV", sep="\t")
+raw_gdelt = spark.read.csv("data/*.export.CSV", sep="\t", header=False)
 
 gdelt_df = raw_gdelt.select(
     col("_c1").alias("SQLDATE"),
@@ -19,7 +19,7 @@ raw_exchange = spark.read.csv("raw_data/year=*/month=*/day=*/exchange_rate.csv",
 
 exchange_df = raw_exchange.select(
     col("Date"),
-    col("Close").cast("float").alias("ExchangeRate")
+    col("ExchangeRate").cast("float")
 )
 
 gdelt_processed = gdelt_df \
@@ -38,7 +38,7 @@ joined_df = exchange_df.join(gdelt_processed, "Date", "inner").orderBy("Date")
 joined_df.write \
     .mode("overwrite") \
     .option("header", "false") \
-    .csv("/user/maria_dev/analyzed_result_csv")
+    .csv("analyzed_result_csv")
 
 print("========================================")
 print("Spark Job Completed Successfully!")
