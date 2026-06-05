@@ -34,10 +34,6 @@ jobs:
       run: |
         python src/ingest/download_exchange_rate.py
 
-    - name: Run Daily Exchange Rate Forecast
-      run: |
-        python src/analyze/LR_lag.py
-
     - name: Process and Join Data
       run: |
         python src/process/spark_join_job.py
