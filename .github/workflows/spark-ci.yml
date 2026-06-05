@@ -42,6 +42,19 @@ jobs:
       run: |
         python src/process/spark_join_job.py
 
+    - name:  DEBUG - Find missing folder
+
+      run: |
+
+        echo "pwd:"
+
+        pwd
+
+        echo "whole sever discover:"
+
+        find . -name "*.csv"
+
+
     - name: Run Daily Exchange Rate Forecast
       run: |
         python src/analyze/LR_lag.py
