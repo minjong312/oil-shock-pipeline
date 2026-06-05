@@ -1,4 +1,5 @@
-from pyspark.sql import SparkSession
+
+m pyspark.sql import SparkSession
 from pyspark.sql.functions import col, to_date, avg, count, when, round
 
 print("========================================")
@@ -18,7 +19,7 @@ gdelt_df = raw_gdelt.select(
 raw_exchange = spark.read.csv("raw_data/year=*/month=*/day=*/exchange_rate.csv", header=True)
 
 exchange_df = raw_exchange.select(
-    col("Date"),
+    to_date(col("Date"), "yyyy-MM-dd").alias("Date"),
     col("ExchangeRate").cast("float")
 )
 
@@ -33,7 +34,7 @@ gdelt_processed = gdelt_df \
         count(when(col("QuadClass") == 4, 1)).alias("Material_Conflicts")
     )
 
-joined_df = exchange_df.join(gdelt_processed, "Date", "inner").orderBy("Date")
+joined_df = exchange_df.join(gdelt_processed, "Date", "left").na.fill(0).orderBy("Date")
 
 joined_df.write \
     .mode("overwrite") \
