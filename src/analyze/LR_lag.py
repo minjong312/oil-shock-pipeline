@@ -9,7 +9,7 @@ import sys
 
 spark = SparkSession.builder.appName("ExchangeRate_Regression").getOrCreate()
 
-df_data = spark.read.csv("hdfs:///user/maria_dev/analyzed_result_csv/*.csv", header=False, inferSchema=True) \
+df_data = spark.read.csv("analyzed_result_csv/*.csv", header=False, inferSchema=True) \
     .toDF("Date", "Total_Events", "Material_Conflicts", "Avg_Goldstein", "ExchangeRate")
 
 
