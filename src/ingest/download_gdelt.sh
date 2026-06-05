@@ -45,4 +45,12 @@ download_range "2023-09-30" "2023-10-21"
 echo "Processing Event 3: Iran-Israel Conflict"
 download_range "2024-04-06" "2024-04-27"
 
+echo "Processing Daily Automation: Recent 5 Days GDELT Ingestion"
+for i in {1..5}; do
+    TARGET_DATE=$(date -d "$i days ago" +%Y-%m-%d)
+    echo "Downloading GDELT for ${TARGET_DATE}..."
+    download_range "${TARGET_DATE}" "${TARGET_DATE}"
+done
+
+
 echo "=== BULK DATA INGESTION COMPLETED ==="
