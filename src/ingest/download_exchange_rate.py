@@ -12,9 +12,6 @@ df = fdr.DataReader('USD/KRW', start=start_date.strftime('%Y-%m-%d'), end=end_da
 
 if df.empty:
     print("[!] Warning: Failed to fetch data.")
-else:
-    # 에러 해결 부분: reset_index() 대신 명시적으로 인덱스를 'Date' 컬럼으로 생성
-    df['Date'] = df.index
     df = df[['Date', 'Close']]
     df.columns = ['Date', 'ExchangeRate']
     
@@ -25,7 +22,7 @@ else:
     month = today.strftime("%m")
     day = today.strftime("%d")
 
-    partition_dir = f"/home/maria_dev/vkospi-project/raw_data/year={year}/month={month}/day={day}"
+    partition_dir = f"./raw_data/year={year}/month={month}/day={day}"
     os.makedirs(partition_dir, exist_ok=True)
 
     file_path = f"{partition_dir}/exchange_rate.csv"
