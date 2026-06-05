@@ -1,33 +1,29 @@
 from pyspark.sql import SparkSession
-from pyspark.ml.regression import LinearRegression
-from pyspark.ml.feature import VectorAssembler
 from pyspark.sql.functions import col
 
-spark = SparkSession.builder.appName("LR_5Day_Window_Forecast").getOrCreate()
+spark = SparkSession.builder.appName("Daily_Data_Dashboard").getOrCreate()
 
-df_data = spark.read.csv("analyzed_result_csv/*.csv", header=False, inferSchema=True) \
-    .toDF("Date", "Total_Events", "Material_Conflicts", "Avg_Goldstein", "ExchangeRate")
+raw_df = spark.read.csv("analyzed_result_csv/*.csv", header=False, inferSchema=True)
 
-df_data = df_data.orderBy("Date")
+if raw_df.isEmpty():
+    print("========================================")
+    print("DataFrame is completely empty. Check ingestion or join logic.")
+    print("========================================")
+    spark.stop()
+    exit(0)
 
-feature_cols = ["Total_Events", "Material_Conflicts", "Avg_Goldstein"]
-assembler = VectorAssembler(inputCols=feature_cols, outputCol="features")
-df_vector = assembler.transform(df_data)
+df_data = raw_df.toDF("Date", "Total_Events", "Material_Conflicts", "Avg_Goldstein", "ExchangeRate")
+df_data = df_data.dropDuplicates(["Date"]).orderBy("Date")
 
-total_rows = df_vector.count()
-
-train_df = df_vector.limit(total_rows - 5)
-test_df = df_vector.orderBy(col("Date").desc()).limit(5).orderBy("Date")
-
-lr = LinearRegression(featuresCol="features", labelCol="ExchangeRate")
-lr_model = lr.fit(train_df)
-
-predictions = lr_model.transform(test_df)
+total_rows = df_data.count()
 
 print("========================================")
-print("Result of 5-Day Trend Based Exchange Rate Forecast")
+print("Daily International Conflict & Exchange Rate Dashboard")
 print("========================================")
-predictions.select("Date", "Total_Events", "Material_Conflicts", "ExchangeRate", "prediction").show()
+if total_rows >= 5:
+    df_data.orderBy(col("Date").desc()).limit(5).orderBy("Date").show(truncate=False)
+else:
+    df_data.show(truncate=False)
 print("========================================")
 
 spark.stop()
