@@ -1,4 +1,4 @@
-me: Spark Pipeline CI
+name: Spark Pipeline CI
 
 on:
   push:
