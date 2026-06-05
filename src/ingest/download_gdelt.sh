@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Target Directories
-DEST_DIR="./data"
+DEST_DIR="raw_data/gdelt"
 mkdir -p ${DEST_DIR}
 
 # Array of target dates (3 events * 21 days = 63 days)
