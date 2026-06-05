@@ -1,4 +1,4 @@
-import os
+mport os
 import pandas as pd
 import FinanceDataReader as fdr
 from datetime import datetime, timedelta
@@ -12,6 +12,7 @@ df = fdr.DataReader('USD/KRW', start=start_date.strftime('%Y-%m-%d'), end=end_da
 
 if not df.empty:
     df = df.reset_index()
+    df.columns = ['Date' if i == 0 else col for i, col in enumerate(df.columns)]
     df = df[['Date', 'Close']]
     df.columns = ['Date', 'ExchangeRate']
 
