@@ -22,7 +22,7 @@ jobs:
           username: ${{ secrets.GCP_TARGET_USER }}
           password: ${{ secrets.GCP_TARGET_PASSWORD }}
           
-          script: 
+          script: |
             export PYSPARK_PYTHON=python3
             export PYSPARK_DRIVER_PYTHON=python3
             echo "Pulling latest code from GitHub..."
@@ -30,4 +30,4 @@ jobs:
             git pull origin main
             echo "Starting Remote Pipeline Execution..."
             chmod +x run_pipeline.sh
-            ./run_pipeline.sh|
+            ./run_pipeline.sh
