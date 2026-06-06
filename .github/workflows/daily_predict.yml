@@ -21,6 +21,8 @@ jobs:
           port: 2222
           username: ${{ secrets.GCP_TARGET_USER }}
           password: ${{ secrets.GCP_TARGET_PASSWORD }}
+
+          command_timeout: 60m
           
           script: |
             export PYSPARK_PYTHON=python3
