@@ -1,0 +1,35 @@
+name: Daily FX Inference Pipeline
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute Pipeline via Bastion Host
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          proxy_host: ${{ secrets.GCP_HOST }}
+          proxy_port: 22
+          proxy_username: ${{ secrets.GCP_PROXY_USER }}
+          proxy_key: ${{ secrets.GCP_PROXY_KEY }}
+          
+          host: 127.0.0.1
+          port: 2222
+          username: ${{ secrets.GCP_TARGET_USER }}
+          password: ${{ secrets.GCP_TARGET_PASSWORD }}
+
+          command_timeout: 60m
+         
+          script: |
+            export PYSPARK_PYTHON=python3
+            export PYSPARK_DRIVER_PYTHON=python3
+            echo "Pulling latest code from GitHub..."
+            cd /home/maria_dev/fx-predict-pipeline
+            git pull origin main
+            echo "Starting Remote Inference Execution..."
+            chmod +x run_inference.sh
+            ./run_inference.sh 
