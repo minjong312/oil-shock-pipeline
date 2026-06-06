@@ -1,0 +1,27 @@
+name: Daily FX Prediction Pipeline
+
+on:
+  schedule:
+
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute Pipeline via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_USERNAME }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          port: ${{ secrets.GCP_PORT }}
+          script: |
+
+            export PYSPARK_PYTHON=python3
+            export PYSPARK_DRIVER_PYTHON=python3
+            
+            echo "Starting Remote Pipeline Execution..."
+            chmod +x /home/maria_dev/fx-predict-pipeline/run_pipeline.sh
+            /home/maria_dev/fx-predict-pipeline/run_pipeline.sh
