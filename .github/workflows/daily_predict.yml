@@ -2,7 +2,6 @@ name: Daily FX Prediction Pipeline
 
 on:
   schedule:
-
     - cron: '0 0 * * *'
   workflow_dispatch:
 
@@ -18,10 +17,8 @@ jobs:
           key: ${{ secrets.GCP_SSH_KEY }}
           port: ${{ secrets.GCP_PORT }}
           script: |
-
             export PYSPARK_PYTHON=python3
             export PYSPARK_DRIVER_PYTHON=python3
-            
             echo "Starting Remote Pipeline Execution..."
             chmod +x /home/maria_dev/fx-predict-pipeline/run_pipeline.sh
             /home/maria_dev/fx-predict-pipeline/run_pipeline.sh
