@@ -9,13 +9,21 @@ jobs:
   run-pipeline:
     runs-on: ubuntu-latest
     steps:
-      - name: Execute Pipeline via SSH
-        uses: appleboy/ssh-action@master
+      - name: Execute Pipeline via Bastion Host
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.GCP_HOST }}
-          username: ${{ secrets.GCP_USERNAME }}
-          password: ${{ secrets.GCP_PASSWORD }}
-          port: ${{ secrets.GCP_PORT }}
+          # 1. 외부 서버 (GCP) 우회 접속 설정
+          proxy_host: ${{ secrets.GCP_HOST }}
+          proxy_port: 22
+          proxy_username: ${{ secrets.GCP_PROXY_USER }}
+          proxy_key: ${{ secrets.GCP_PROXY_KEY }}
+          
+          # 2. 내부 서버 (maria_dev 샌드박스) 최종 접속 설정
+          host: 127.0.0.1
+          port: 2222
+          username: ${{ secrets.GCP_TARGET_USER }}
+          password: ${{ secrets.GCP_TARGET_PASSWORD }}
+          
           script: |
             export PYSPARK_PYTHON=python3
             export PYSPARK_DRIVER_PYTHON=python3
