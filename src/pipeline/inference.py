@@ -7,7 +7,7 @@ import sys
 spark = SparkSession.builder.appName("FX_Inference").getOrCreate()
 
 try:
-    data_path = "hdfs:///user/maria_dev/tuned_data" 
+    data_path = "hdfs:///user/maria_dev/fx_project/processed/ml_dataset"
     df = spark.read.parquet(data_path)
 
     latest_data = df.orderBy(df["Date"].desc()).limit(1)
