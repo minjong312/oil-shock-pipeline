@@ -1,6 +1,4 @@
-
 from pyspark.sql import SparkSession
-from pyspark.ml import PipelineModel
 from pyspark.ml.classification import RandomForestClassificationModel
 import sys
 
@@ -13,11 +11,12 @@ try:
     latest_data = df.orderBy(df["Date"].desc()).limit(1)
 
     model_path = "hdfs:///user/maria_dev/fx_rf_model"
-    model = PipelineModel.load(model_path) 
+    model = RandomForestClassificationModel.load(model_path)
 
     predictions = model.transform(latest_data)
-    
+
     result = predictions.select("Date", "prediction").collect()[0]
+    
     print("========================================")
     print(f"[Daily Inference Result] Date: {result['Date']}, Predicted Class: {result['prediction']}")
     print("========================================")
