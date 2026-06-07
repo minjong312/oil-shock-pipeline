@@ -8,4 +8,7 @@ python3 ${PROJECT_DIR}/src/ingest/get_yfinance.py
 python3 ${PROJECT_DIR}/src/ingest/get_gdelt.py
 spark-submit ${PROJECT_DIR}/src/pipeline/preprocess.py
 spark-submit ${PROJECT_DIR}/src/pipeline/rf_model.py
-echo "Pipeline Complete."
+spark-submit ${PROJECT_DIR}/src/pipeline/visualize.py
+echo "Pipeline Complete.
+
+"
