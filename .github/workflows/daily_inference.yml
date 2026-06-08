@@ -2,7 +2,7 @@ name: Daily FX Inference Pipeline
 
 on:
   schedule:
-    - cron: '0 5 * * *'
+    - cron: '37 6 * * *'
   workflow_dispatch:
 
 jobs:
