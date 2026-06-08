@@ -35,6 +35,10 @@ for t_date in target_dates:
     for i in range(6):
         d = t_date - datetime.timedelta(days=i)
         dates_to_download.add(d)
+today_date = datetime.date.today()
+for i in range(6):
+    d = today_date - datetime.timedelta(days=i)
+    dates_to_download.add(d)
 
 sorted_dates = sorted(list(dates_to_download))
 print("Total unique dates to download: " + str(len(sorted_dates)))
