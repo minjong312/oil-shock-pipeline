@@ -1,6 +1,7 @@
 #!/bin/bash
 export PYSPARK_PYTHON=python3
 export PYSPARK_DRIVER_PYTHON=python3
+export PYTHONIOENCODING=utf-8
 PROJECT_DIR="/home/maria_dev/fx-predict-pipeline"
 
 echo "Starting Daily Inference Pipeline..."
