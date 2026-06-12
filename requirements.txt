@@ -1,5 +1,4 @@
-yfinance==0.2.31
-gdelt==1.1.11
-pyspark==3.2.1
+requests==2.31.0
+pandas==2.1.0
+pyspark==3.5.0
 plotly==5.18.0
-pandas==2.0.3
