@@ -55,8 +55,9 @@ dxy = get_fred_data("DTWEXBGS", api_key, start_date)
 dxy.columns = ["DXY"]
 
 print("Merging data...")
+
 merged_data = pd.concat([usdkrw, wti, dxy], axis=1)
-merged_data = merged_data.fillna(method='ffill')
+merged_data = merged_data.ffill()
 merged_data = merged_data.dropna()
 
 if merged_data.empty:
