@@ -1,10 +1,11 @@
+import optuna
 from pyspark.sql import SparkSession
 from pyspark.ml.classification import RandomForestClassifier
 from pyspark.ml.evaluation import MulticlassClassificationEvaluator
 import sys
 
 spark = SparkSession.builder \
-    .appName("FX_Predict_RF_Model_Tuned") \
+    .appName("FX_Predict_RF_Model_Optuna_Tuned") \
     .getOrCreate()
 
 hdfs_proc_dir = "/user/maria_dev/fx_project/processed"
@@ -20,28 +21,68 @@ print("Step 2: Splitting data into Train and Test sets...")
 train_data = data.filter(data["Date"] < "2024-01-01")
 test_data = data.filter(data["Date"] >= "2024-01-01")
 
-print("Step 3: Training Tuned Random Forest Classifier...")
-# Tuned Parameters: numTrees=200, maxDepth=7
-rf = RandomForestClassifier(featuresCol="features", labelCol="label", numTrees=200, maxDepth=7, minInstancesPerNode=2, seed=42)
-model = rf.fit(train_data)
+train_data.cache()
+test_data.cache()
 
-print("Step 4: Evaluating Model Performance...")
-predictions = model.transform(test_data)
+print("Step 3: Hyperparameter Tuning with Optuna...")
+def objective(trial):
+    rf_numTrees = trial.suggest_int("numTrees", 50, 200)
+    rf_maxDepth = trial.suggest_int("maxDepth", 5, 10)
+    rf_minInstances = trial.suggest_int("minInstancesPerNode", 1, 5)
+
+    rf = RandomForestClassifier(
+        featuresCol="features", 
+        labelCol="label", 
+        numTrees=rf_numTrees, 
+        maxDepth=rf_maxDepth, 
+        minInstancesPerNode=rf_minInstances, 
+        seed=42
+    )
+    temp_model = rf.fit(train_data)
+
+    predictions = temp_model.transform(test_data)
+    evaluator_f1 = MulticlassClassificationEvaluator(labelCol="label", predictionCol="prediction", metricName="f1")
+    f1_score = evaluator_f1.evaluate(predictions)
+
+    return f1_score
+
+study = optuna.create_study(direction="maximize")
+print("Starting Optuna optimization trials...")
+study.optimize(objective, n_trials=10)
+
+print("========================================")
+print("Optuna Best F1-Score :", round(study.best_value, 4))
+print("Optuna Best Parameters :", study.best_params)
+print("========================================")
+
+print("Step 4: Training Final Model with Best Parameters...")
+best_rf = RandomForestClassifier(
+    featuresCol="features", 
+    labelCol="label", 
+    numTrees=study.best_params["numTrees"], 
+    maxDepth=study.best_params["maxDepth"], 
+    minInstancesPerNode=study.best_params["minInstancesPerNode"], 
+    seed=42
+)
+final_model = best_rf.fit(train_data)
+
+print("Step 5: Evaluating Final Model Performance...")
+final_predictions = final_model.transform(test_data)
 
 evaluator_acc = MulticlassClassificationEvaluator(labelCol="label", predictionCol="prediction", metricName="accuracy")
-accuracy = evaluator_acc.evaluate(predictions)
+final_accuracy = evaluator_acc.evaluate(final_predictions)
 
 evaluator_f1 = MulticlassClassificationEvaluator(labelCol="label", predictionCol="prediction", metricName="f1")
-f1_score = evaluator_f1.evaluate(predictions)
+final_f1_score = evaluator_f1.evaluate(final_predictions)
 
 print("========================================")
-print("Model Evaluation Results (Tuned Multi-class):")
-print("Accuracy   : " + str(round(accuracy * 100, 2)) + "%")
-print("Weighted F1: " + str(round(f1_score, 4)))
+print("Final Model Evaluation Results:")
+print("Accuracy    : " + str(round(final_accuracy * 100, 2)) + "%")
+print("Weighted F1 : " + str(round(final_f1_score, 4)))
 print("========================================")
 
-print("Step 5: Extracting Feature Importances Ranking...")
-importances = model.featureImportances.toArray()
+print("Step 6: Extracting Feature Importances Ranking...")
+importances = final_model.featureImportances.toArray()
 
 feature_cols = []
 for f in ["WTI", "DXY", "NewsVolume"]:
@@ -60,8 +101,13 @@ for i in range(len(feat_imp_list)):
 print("========================================")
 
 print("Done! Phase 5 Complete.")
-spark.stop()
+
+train_data.unpersist()
+test_data.unpersist()
+
 
 model_path = "hdfs:///user/maria_dev/fx_rf_model"
-model.write().overwrite().save(model_path)
-print(f"Model successfully saved to {model_path}")
+final_model.write().overwrite().save(model_path)
+print(f"Final Model successfully saved to {model_path}")
+
+spark.stop()
