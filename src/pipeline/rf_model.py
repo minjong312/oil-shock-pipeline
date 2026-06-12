@@ -14,7 +14,7 @@ print("Step 1: Loading tuned ML dataset...")
 try:
     data = spark.read.parquet(hdfs_proc_dir + "/ml_dataset")
 except Exception as e:
-    print("Error loading data.")
+    print(f"Error loading data. {e}")
     sys.exit(1)
 
 print("Step 2: Splitting data into Train and Test sets...")
